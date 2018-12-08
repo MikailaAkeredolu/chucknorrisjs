@@ -1,55 +1,90 @@
-document.querySelector('.get-jokes').addEventListener('click', getJokes);
+//Init Github
+const github = new GitHub;
 
-function getJokes(e){
-    const number = document.querySelector('input[type="number"]').value;
-    console.log(number);
+//Init UI
+const ui = new UI;
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', `http://api.icndb.com/jokes/random/${number}`, true);
-
-    xhr.send();
-
-    //what to do when we get data
-    xhr.onload = function(){
-        if(this.status === 200){
-            const response = JSON.parse(this.responseText);
-            console.log(response);
-
-            let output = '';
-
-            if(response.type === 'success'){
-
-                response.value.forEach(function(joke){
-                    output +=  `<li>${joke.joke}</li>`
-                });
-
+const searchUser = document.getElementById('searchUser');
+searchUser.addEventListener('keyup', (e) => {
+//Get input text
+    const userText = e.target.value;
+    //check if user input is not empty
+    if(userText !== ''){
+    //Make http call to github using github.js method
+        github.getUser(userText)
+        .then( data => {
+            if(data.profile.message === 'Not Found'){
+                //show alert - from UI.js
+              ui.showAlert('User not found', 'alert alert-danger');
             }else{
-                output += '<li>Something Went wrong</li>'
+                //show profile -from ui.js
+                ui.showProfile(data.profile);
+                ui.showRepos(data.repos);
             }
-
-            document.querySelector('.jokes').innerHTML = output;
-        }
+        })
+    }else{
+        //clear profile -from ui.js
+        ui.clearProfile();
     }
+});
 
-    e.preventDefault();
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*//Async with Fetch
+async function getUsers(){
+    //await response of the fetch call
+    const response = await fetch('https://jsonplaceholder.typicode.com/users');
+    //proceed only when promise is resolved
+    const data = await response.json();
+    //only proceed when second promise is resolved
+    let output = '';
+    data.forEach(user => {
+        output += `<li>${user.name}`
+    });
+    document.getElementById('output').innerHTML = output;
+    return data;
 }
 
 
+getUsers()
+.then(users=>console.log(users))
+.catch(err=>console.log(err));
+
+*/
 
 
-//document.getElementById('button').addEventListener('click', loadData);
 
-// function loadData(){
-//     //Create an XHR Object
-//     const xhr = new XMLHttpRequest();
-//     //Open - type of request and url
-//     xhr.open('GET', 'data.txt', true);
-//     xhr.onload = function(){
-//         if(this.status === 200){
-//             console.log(this.responseText);
-//         }
-//     }
+//asyn returns a promise
+/*
+async function myFunc(){
+    //return 'Hello';
 
-//     xhr.send();
+    const promise = new Promise((resolve, reject) => {
+        setTimeout(( )=> resolve('hello'), 1000);
+    });
+    //error
+    const error = false;
+    if(!error){
+         //use await to wait till its resolved
+    const res = await promise; //wait till promise is resolved b4 sending response
+    return res;
+    }else{
+        await Promise.reject(new Error('Something went wrong!!!'));
+    }
+}
 
-// }
+myFunc()
+.then(res=>console.log(res))
+.catch(err=>console.log(err));
+*/
